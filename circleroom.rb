@@ -18,9 +18,11 @@ class CircleRoom
 	                'water','water_noswim', 'flying', 'underwater']
 	@@directions = ['north', 'east', 'south', 'west', 'up', 'down']
 
-	attr_accessor :id, :short, :long, :type, :items, :exits, :codebase
+	attr_accessor :id, :zone_id, :short, :long, :type, :items, :exits,
+	              :codebase
 
 	def initialize()
+
 		@exits = []
 		@items = []
 
@@ -31,12 +33,6 @@ class CircleRoom
 	end
 
 	# Takes a full *.wld file and parses it into individual rooms.
-	#
-	# TODO: If we change the array of rooms to an array of hashes containing
-	#       the room ID along with the room object, we can change the hard to
-	#       read <zone_id>.js naming format to <zone_id>-<room_title>.js.
-	#       This would, however, require reprocessing after the room list is
-	#       complete.
 	def self.parse_wld(wld)
 
 		rooms = []
@@ -93,13 +89,12 @@ class CircleRoom
 
 		codes = line.split(/\s/)
 
-		# We don't have a use for zone_id or bitvectors.
-		#
-		# TODO: We should at least add light support for dark rooms.
-		zone_id   = codes.shift
-		bitvector = codes.shift
+		@zone_id   = codes.shift
 
-		@type     = @@room_types[codes.shift.to_i]
+		# TODO: We should at least add light support for dark rooms.
+		@bitvector  = codes.shift
+
+		@type       = @@room_types[codes.shift.to_i]
 
 	end
 
@@ -199,14 +194,24 @@ class CircleRoom
 	end
 
 	# Takes the list of all rooms and expands the exits (ie, 1.js becomes
-	# 1-The_Void.js).
+	# 0001-The_Void.js).
 	#
 	# TODO: Fill out this method.
-	def expand_exits(room_list)
+	def expand_exits(index)
+		@exits.each do |ex|
+			id = ex['room']
+			if index[id] 
+				ex['room'] = index[id].expand_id
+			end
+		end
+	end
+
+	def get_directory
+		("%04d" % @zone_id) + "/"
 	end
 
 	def expand_id
-		@id+"-"+@short.gsub(/[^\w]+/, '_')
+		get_directory()+@short.gsub(/[^\w]+/, '_')
 	end
 
 	def get_binding

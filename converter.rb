@@ -32,6 +32,14 @@ source_path = ARGV.shift.gsub(/\/$/, '')
 output_path = ARGV.shift.gsub(/\/$/, '')
 zone = ARGV.shift 
 
+# Create the output path if it doesn't exist.
+Dir::mkdir(output_path) if not FileTest::directory?(output_path)
+
+if (FileTest::directory?(source_path))
+	puts "Cannot find source path: "+source_path
+	exit
+end
+
 zones = []
 if zone
 	zones = [zone]
@@ -42,19 +50,41 @@ else
 	Dir.chdir(root_path)
 end
 
+rooms = []
+index = {}
+
 # Open each zone's wld file, extract all the room objects, then output in Disco
 # format.
 zones.each do |zone|
-	rooms = []
+
 	wld   = File.open(source_path+"/wld/#{zone}.wld").read
 	rooms.concat(CircleRoom.parse_wld(wld))
-	rooms.each do |room|
-		# Convert the room file into JavaScript
-		code = RoomGenerator.output_disco(room)
-		# Save to rooms/<number>.js
-		file = File.open(output_path+'/'+room.id+'.js', 'w') {|f| f.write(code)}
-	end
+	
 	puts "LOAD COMPLETE: Zone "+zone
+
 end
 
 puts "Finished loading all zones."
+puts "Saving files..."
+
+# We need to build an index of all the rooms so we can convert their IDs
+# to something more readable.
+rooms.each { |room| index[room.id] = room }
+
+rooms.each do |room|
+
+	room.expand_exits(index)
+
+	# Convert the room file into JavaScript
+	code = RoomGenerator.output_disco(room)
+
+	# Make sure the zone directory exists.
+	dir = output_path + "/" + room.get_directory 
+	Dir::mkdir(dir) if not FileTest::directory?(dir)
+
+	# Save to rooms/<zone_id>/<room_short>.js
+	file = File.open(output_path+'/'+room.expand_id+'.js', 'w') {|f| f.write(code)}
+
+end
+
+puts "Finished saving all rooms."
