@@ -2,7 +2,7 @@ Introduction
 ==============
 
 This library converts CircleMUD and DikuMUD-compatible area files into a 
-format compatible with Disco, a modernized, web-enabled modern MUD engine
+format compatible with Discord, a modernized, web-enabled modern MUD engine
 built with Node.JS and MooTools.
 
 Basic Usage
