@@ -60,15 +60,15 @@ class CircleRoom
 		room = self.new()
 		data = raw.scan(@@pattern).shift
 		
-		#Unescape tildes.  Again, shame.
-		data = data.map { |l| l.gsub(tilde_esc, '~') }
-
 		# Let the user know about our failure.
 		if !data
 			puts "FAIL (complete): "
 			puts "====> "+raw
 			return nil
 		end
+		
+		#Unescape tildes.  Again, shame.
+		data = data.map { |l| l.gsub(tilde_esc, '~') }
 
 		# Probably should move the escaping to something more template-specific
 		# at a later date.

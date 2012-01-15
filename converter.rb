@@ -11,8 +11,8 @@
 # @author Michelle Steigerwalt <msteigerwalt.com>
 # @copyright 2010 Michelle Steigerwalt
 
-require "circleroom"
-require "roomgenerator"
+require "./circleroom"
+require "./roomgenerator"
 
 # Command-line documentation of arguments.
 unless ARGV.length == 2 || ARGV.length == 3
@@ -28,14 +28,14 @@ end
 
 # Fun configuration options!
 root_path   = Dir.getwd
-source_path = ARGV.shift.gsub(/\/$/, '')
-output_path = ARGV.shift.gsub(/\/$/, '')
+source_path = root_path + '/' + ARGV.shift.gsub(/\/$/, '')
+output_path = root_path + '/' + ARGV.shift.gsub(/\/$/, '')
 zone = ARGV.shift 
 
 # Create the output path if it doesn't exist.
 Dir::mkdir(output_path) if not FileTest::directory?(output_path)
 
-if (FileTest::directory?(source_path))
+if (!FileTest::directory?(source_path))
 	puts "Cannot find source path: "+source_path
 	exit
 end
